@@ -1,0 +1,64 @@
+---
+title: "Testing of SWMPrExtension"
+author: "Dave Eslinger"
+date: "2/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Purpose
+
+Just a spot to save code bits to be run from within the SWMPrExtension package
+
+## Seasonal_barplot labels
+
+Labels are not correct for long time series.
+
+```{r seasonal_barplot}
+library(SWMPrExtension)
+load("../tmp/job_met.rda")
+seasonal_barplot(dat, param = param, 
+                 hist_rng = hist_rng, 
+                 season_grps = season_grps, 
+                 season_names = season_names, 
+                 hist_avg = T, 
+                 log_trans = F, 
+                 converted = F, 
+                 season_facet = T, 
+                 plot_title = T)
+```
+
+I want different hlines on faceted plots
+```{r working_hline_on_facets}
+library(tidyverse)
+dMean <- mtcars %>%
+    group_by(gear) %>%
+    summarise(MN = mean(cyl))
+ggplot(mtcars) +
+    geom_point(aes(mpg, cyl)) +
+    geom_hline(data = dMean, aes(yintercept = MN)) +
+    facet_wrap(~ gear)
+
+p1 <- ggplot(mtcars) +
+    geom_point(aes(mpg, cyl))
+p2 <- p1 +
+     geom_hline(data = dMean, aes(yintercept = MN))
+ 
+(p3 <- p2 +
+    facet_wrap(~ gear))
+```
+
+
+```{r jobos_hline}
+load("../tmp/job_totprcp_dat_hist.rda")
+foo <- job_totoprcp_dat_hist
+
+ggplot(foo) +
+  
+ggplot(data = foo, aes_(x = yr, y = res, fill = seas)) +
+      geom_bar(stat = "identity", position = bar_position)
+```
+
