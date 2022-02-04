@@ -19,7 +19,7 @@ Labels are not correct for long time series.
 
 ```{r seasonal_barplot}
 library(SWMPrExtension)
-load("../tmp/job_met.rda")
+load(here("../SWMPrExtension_TESTING/data/job_met.rda"))
 seasonal_barplot(dat, param = param, 
                  hist_rng = hist_rng, 
                  season_grps = season_grps, 
@@ -42,10 +42,10 @@ ggplot(mtcars) +
     geom_hline(data = dMean, aes(yintercept = MN)) +
     facet_wrap(~ gear)
 
-p1 <- ggplot(mtcars) +
-    geom_point(aes(mpg, cyl))
-p2 <- p1 +
-     geom_hline(data = dMean, aes(yintercept = MN))
+(p1 <- ggplot(mtcars) +
+    geom_point(aes(mpg, cyl)))
+(p2 <- p1 +
+     geom_hline(data = dMean, aes(yintercept = MN)))
  
 (p3 <- p2 +
     facet_wrap(~ gear))
@@ -53,12 +53,23 @@ p2 <- p1 +
 
 
 ```{r jobos_hline}
-load("../tmp/job_totprcp_dat_hist.rda")
-foo <- job_totoprcp_dat_hist
+load(here("../SWMPrExtension_TESTING/data/job_totprcp_dat_hist.rda"))
+foo <- ungroup(job_totoprcp_dat_hist)
 
-ggplot(foo) +
+# ggplot(data = dat_hist, aes_(x = yr, y = res, fill = seas)) +
+#       geom_bar(stat = "identity", position = bar_position) 
+ggplot(data = foo, 
+       aes(x = "year", y = "result", fill = "season")) +
+      geom_bar(stat = "count", position = "stack") +
+  facet_wrap(~ season)
   
-ggplot(data = foo, aes_(x = yr, y = res, fill = seas)) +
-      geom_bar(stat = "identity", position = bar_position)
+ggplot() +
+      geom_point(data = foo, aes_(x = year, y = result, fill = season),
+               stat = "identity")
+```
+
+```{r}
+bar_seas +
+        facet_wrap(seas, ncol = 1)
 ```
 
