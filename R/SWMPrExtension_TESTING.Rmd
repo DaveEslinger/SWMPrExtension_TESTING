@@ -67,17 +67,18 @@ ggplot(mtcars) +
 
 ```{r jobos_hline}
 load(here("../SWMPrExtension_TESTING/data/job_totprcp_dat_hist.rda"))
-foo <- job_totoprcp_dat_hist
+foo <- ungroup(job_totoprcp_dat_hist)
 
 # ggplot(data = dat_hist, aes_(x = yr, y = res, fill = seas)) +
 #       geom_bar(stat = "identity", position = bar_position) 
-ggplot(data = foo, 
-       aes(x = "year", y = "result", fill = "season")) +
-      geom_bar(stat = "count", position = "stack") +
+ggplot() +# data = foo, 
+       # aes(x = year, y = result, fill = season)) +
+      # geom_bar(stat = "identity", position = "stack") +
+      geom_col(data = foo,aes(x = year, y = result, fill = season), position = "stack") +
   facet_wrap(~ season)
   
 ggplot() +
-      geom_point(data = foo, aes_(x = year, y = result, fill = season),
+      geom_point(data = foo, aes(x = year, y = result, color = season),
                stat = "identity")
 ```
 
