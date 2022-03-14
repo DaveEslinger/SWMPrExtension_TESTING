@@ -112,6 +112,41 @@ season_grps <- list(c(1,2,3), c(4,5,6), c(7,8,9), c(10, 11, 12))
 season_names <- c('Winter', 'Spring', 'Summer', 'Fall')
 
 
+```
 
+
+## GRB OB temperature fails seasonal_dot plot
+
+```{r load_libraries}
+library(SWMPrExtension)
+```
+```{r read_grborwq}
+getwd()
+grbwq <- readRDS(file = "../SWMPrExtension_TESTING/data/grborwq_2010-2020.rds")
+```
+
+Set parameters that fail and call seasonal_dot
+```{r set_grb_params}
+
+param  <- "temp"
+trnd_lab  <- T
+trnd_lab <-  T 
+par_free_y  <-  T
+converted_par <-  T
+include_station_ttl <-  T
+plot  <-  TRUE
+par_season_grp <-  list(c(1,2,3), c(4,5,6), c(7,8,9), c(10, 11, 12))
+par_season_names <-  c("Winter", "Spring", "Summer", "Fall")
+
+seasonal_dot(grbwq
+             , param = "temp"
+             , lm_trend = trnd_lab
+             , lm_lab = trnd_lab  
+             , free_y = par_free_y
+             , converted = converted_par
+             , plot_title = include_station_ttl
+             , plot = TRUE
+             , season_grps = par_season_grp
+             , season_names = par_season_names)
 ```
 
