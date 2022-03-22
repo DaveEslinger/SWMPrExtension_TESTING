@@ -38,18 +38,18 @@ library(tidyverse)
 gr <- sym("gear")
 
 dMean <- mtcars %>%
-    group_by(!!gr) %>%
-    summarise(MN = mean(cyl))
+  group_by(!!gr) %>%
+  summarise(MN = mean(cyl))
 ggplot(mtcars) +
-    geom_point(aes(mpg, cyl)) +
-    geom_hline(data = dMean, aes(yintercept = MN)) +
-    facet_wrap(gr)
+  geom_point(aes(mpg, cyl)) +
+  geom_hline(data = dMean, aes(yintercept = MN)) +
+  facet_wrap(gr)
 
 (p1 <- ggplot(mtcars) +
     geom_point(aes(mpg, cyl)))
 (p2 <- p1 +
-     geom_hline(data = dMean, aes(yintercept = MN)))
- 
+    geom_hline(data = dMean, aes(yintercept = MN)))
+
 (p3 <- p2 +
     facet_wrap(gr))
 
@@ -57,8 +57,8 @@ ggplot(mtcars) +
 (bp1 <- ggplot(data = mtcars, aes(x = cyl, y = mpg, fill = gear)) +
     geom_bar(stat = "count", position = "stack"))
 (bp2 <- bp1 +
-     geom_hline(data = dMean, aes(yintercept = MN)))
- 
+    geom_hline(data = dMean, aes(yintercept = MN)))
+
 (bp3 <- bp2 +
     facet_wrap(gr))
 
@@ -72,19 +72,19 @@ foo <- ungroup(job_totoprcp_dat_hist)
 # ggplot(data = dat_hist, aes_(x = yr, y = res, fill = seas)) +
 #       geom_bar(stat = "identity", position = bar_position) 
 ggplot() +# data = foo, 
-       # aes(x = year, y = result, fill = season)) +
-      # geom_bar(stat = "identity", position = "stack") +
-      geom_col(data = foo,aes(x = year, y = result, fill = season), position = "stack") +
+  # aes(x = year, y = result, fill = season)) +
+  # geom_bar(stat = "identity", position = "stack") +
+  geom_col(data = foo,aes(x = year, y = result, fill = season), position = "stack") +
   facet_wrap(~ season)
-  
+
 ggplot() +
-      geom_point(data = foo, aes(x = year, y = result, color = season),
-               stat = "identity")
+  geom_point(data = foo, aes(x = year, y = result, color = season),
+             stat = "identity")
 ```
 
 ```{r}
 bar_seas +
-        facet_wrap(seas, ncol = 1)
+  facet_wrap(seas, ncol = 1)
 ```
 
 ```{r get_apaebmet}
@@ -96,11 +96,11 @@ dat <- qaqc(apaebmet, qaqc_keep = c('0', '3', '5'))
 
 ```{r with_SWMPrExtension}
 seasonal_barplot(dat, param = 'totprcp'
-                      , season_grps = list(c(1,2,3), c(4,5,6), c(7,8,9), c(10, 11, 12))
-                      , season_names = c('Winter', 'Spring', 'Summer', 'Fall')
-                      , season_facet = TRUE
-                      , hist_avg = TRUE
-                      , converted = FALSE)
+                 , season_grps = list(c(1,2,3), c(4,5,6), c(7,8,9), c(10, 11, 12))
+                 , season_names = c('Winter', 'Spring', 'Summer', 'Fall')
+                 , season_facet = TRUE
+                 , hist_avg = TRUE
+                 , converted = FALSE)
 
 ```
 
@@ -110,10 +110,50 @@ seasonal_barplot(dat, param = 'totprcp'
 
 season_grps <- list(c(1,2,3), c(4,5,6), c(7,8,9), c(10, 11, 12))
 season_names <- c('Winter', 'Spring', 'Summer', 'Fall')
+names(season_grps) <- season_names
+x <- data.frame(month = lubridate::month(dat$datetimestamp))
+
+seas_nm <- unlist(lapply(1:length(season_names), function(x) rep(names(season_grps[x]),length(season_grps[[x]])))) #this doesn't work for weird season assignments
+df <- data.frame(month = unname(unlist(season_grps)), nm = seas_nm)
+x <- left_join(x, df)
+x <- factor(x[, 2])
+x <- ordered(x, season_names)
+
+mdat <- dat %>% 
+  select(datetimestamp, totprcp) %>% 
+  mutate(year = lubridate::year(datetimestamp),
+         month = lubridate::month(datetimestamp))
+mdat$season <- x
+
+hmdat <- mdat %>% 
+  group_by(year, season) %>% 
+  summarize(result = sum(totprcp, na.rm = TRUE), .groups = "drop") 
+
+yr_mean <- hmdat %>% 
+  group_by(season) %>%
+  summarize(mean = mean(result, na.rm = TRUE), .groups = "drop")
+
+mhist <- merge(hmdat, yr_mean)
+ggplot(data = mhist, aes(x = year, y = result, fill = season)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_hline(aes(yintercept = mean), color = '#767171', lwd = 1.5, show.legend = TRUE) +
+  scale_linetype_manual(values = 'solid') +
+facet_wrap(~season)
 
 
+
+bar_seas + geom_hline(data = dat_hist, aes(yintercept = mean)) #WORKS
 ```
 
+```{r dat_hist_from_apaebmet}
+dhist <- readRDS(here::here("../SWMPrExtension_TESTING/data/dat_hist_apaebmet.rds"))
+
+ggplot(data = dhist, aes(x = year, y = result, fill = season)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_hline(aes(yintercept = mean), color = '#767171', lwd = 1.5, show.legend = TRUE) +
+  scale_linetype_manual(values = 'solid') +
+facet_wrap(~season)
+```
 
 ## GRB OB temperature fails seasonal_dot plot
 
@@ -148,5 +188,21 @@ seasonal_dot(grbwq
              , plot = TRUE
              , season_grps = par_season_grp
              , season_names = par_season_names)
+```
+
+## UTM for national_sk_map
+
+```{r get_sample_data_as_from_help}
+nerr_states_west <- c('02', '06', '41', '53', '72', '15')
+
+nerrs_codes <- c('pdb', 'sos', 'sfb', 'elk', 'tjr', 'kac', 'job', 'hee')
+
+nerrs_sk_results <- c('inc', 'inc', 'dec', 'insig', 'insuff', 'dec', 'inc', 'dec')
+
+```
+
+```{r run_map}
+national_sk_map(highlight_states = nerr_states_west,
+                sk_reserve = nerrs_codes, sk_results = nerrs_sk_results)
 ```
 
